@@ -215,7 +215,96 @@ class Freshbooks_oauth
 		elseif($response->attributes()->status == 'fail' || $response->error)	throw new FreshbooksAPIError($response->error);
 		else																	throw new FreshbooksError('Oops, something went wrong. :(');
 	}
+
+	// ------------- Helper functions to get different datasets -------------------- //
+
+	//
+	// This function will return all the categories on the account.
+	//
+	function get_categories()
+	{
+		if($this->oauth_token_secret && $this->oauth_token) { 
+			$data = array();
+			$request = '<?xml version="1.0" encoding="utf-8"?><request method="category.list"></request>';		
+
+			foreach($this->_get_data($request)->categories AS $key => $row)
+				foreach($row AS $key2 => $row2)
+					$data[] = $row2;
+					
+			return $data;
+		}
+		return 0;
+	}
+
+	//
+	// This function will return all the expenses on the account.
+	//
+	function get_expenses()
+	{
+		if($this->oauth_token_secret && $this->oauth_token) { 
+			$data = array();
+			$request = '<?xml version="1.0" encoding="utf-8"?><request method="expense.list"></request>';		
+
+			foreach($this->_get_data($request)->expenses AS $key => $row)
+				foreach($row AS $key2 => $row2)
+					$data[] = $row2;
+					
+			return $data;
+		}
+		return 0;
+	}
+
+	//
+	// This function will return all the payments on the account.
+	//
+	function get_payments()
+	{
+		if($this->oauth_token_secret && $this->oauth_token) { 
+			$data = array();
+			$request = '<?xml version="1.0" encoding="utf-8"?><request method="payment.list"></request>';		
+			
+			foreach($this->_get_data($request)->payments AS $key => $row)
+				foreach($row AS $key2 => $row2)
+					$data[] = $row2;
+					
+			return $data;
+		}
+		return 0;
+	}
+
+	//
+	// This function will return all the customers in the account.
+	//
+	function get_customers()
+	{
+		if($this->oauth_token_secret && $this->oauth_token) { 
+			$data = array();
+			$request = '<?xml version="1.0" encoding="utf-8"?><request method="client.list"></request>';		
+			
+			foreach($this->_get_data($request)->clients AS $key => $row)
+				foreach($row AS $key2 => $row2)
+					$data[] = $row2;
+
+			return $data;
+		}
+		return 0;
+	}
 	
+	//
+	// Make the data request.
+	//
+	private function _get_data($request)
+	{
+		try {
+		  $clients = $this->post($request);
+		  return $clients;
+		}
+		catch(FreshbooksError $e)
+		{
+		  $this->error = $e->getMessage();
+		  return 0;
+		}	
+	}
 }
 
 class FreshbooksError extends Exception {}

@@ -16,3 +16,12 @@ To install:
 - Run the login method of the Freshbooks controller. 
 
 - To set a different sub domain from your consumer key use the $this->freshbooks_oauth->set_namespace('xxxxxxx'); See the constructor of freshbooks.php
+
+Get Data Calls:
+
+Currently we do not support all the different calls to FreshBooks but we do have a handful to work from. In Freshbooks_oauth.php if you scroll to the comment section "Helper functions to get different datasets" you will be able to add or modify function calls to meet your data needs.
+
+- $this->freshbooks_oauth->get_categories()
+- $this->freshbooks_oauth->get_expenses()
+- $this->freshbooks_oauth->get_payments()
+- $this->freshbooks_oauth->get_customers()
