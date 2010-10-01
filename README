@@ -3,9 +3,9 @@ Email: spicer@cloudmanic.com
 Website: http://www.cloudmanic.com
 Built: 9/30/2010
 
-This is a php library designed to be used with the Codeigniter frame work.
+This is a php library designed to be used with the Codeigniter framework.
 
-This library is based off of the work found here http://blog.michaelhelmick.com/2010/07/30/freshbooks-api-using-oauth/ by Mike Helmick. The code base as changed to work within the Codeignitor http://codeigniter.com library format. Also a controller class was added to demo the use of this library.
+This library is based off of the work found here http://blog.michaelhelmick.com/2010/07/30/freshbooks-api-using-oauth/ by Mike Helmick. The codebase as changed to work within the Codeignitor http://codeigniter.com library format. Also a controller class was added to demo the use of this library.
 
 To install:
 
