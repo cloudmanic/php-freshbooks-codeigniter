@@ -122,8 +122,11 @@ class Freshbooks_oauth
 	public function getLoginUrl()
 	{
 		$token = $this->getRequestToken();
-		$loginUrl = $this->authorizeUrl().'?oauth_token='.$token['oauth_token'];
-		return $loginUrl;
+		
+		if(isset($token['oauth_token']))
+			return $this->authorizeUrl().'?oauth_token='.$token['oauth_token'];
+		else 
+			return 0;
 	}
 	
 	
