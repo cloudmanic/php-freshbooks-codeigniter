@@ -13,6 +13,10 @@ class Freshbooks extends Controller
 		parent::__construct();
 		$this->load->library('freshbooks/freshbooks_oauth');
 		$this->load->library('session');
+		
+		// This is optional. This will allow you to select the subdomain of the freshbooks account you are 
+		// trying to access. If you leave it blank it will default to your oauth_consumer_key
+		//$this->freshbooks_oauth->set_namespace('xxxxxxx');
 	}
 	
 	//

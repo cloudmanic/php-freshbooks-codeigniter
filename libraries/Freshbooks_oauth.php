@@ -39,6 +39,7 @@ class Freshbooks_oauth
 	protected $oauth_callback;
 	protected $oauth_token;
 	protected $oauth_token_secret;
+	protected $urlnamespace;
 	
 	
 	function __construct()
@@ -67,10 +68,15 @@ class Freshbooks_oauth
 		$this->oauth_token_secret = $oauth_token_secret;
 	}
 	
-	public function apiUrl() { return 'https://'.$this->oauth_consumer_key.'.freshbooks.com/api/2.1/xml-in'; }
-	public function accessTokenUrl()  { return 'https://'.$this->oauth_consumer_key.'.freshbooks.com/oauth/oauth_access.php'; }
-	public function authorizeUrl()    { return 'https://'.$this->oauth_consumer_key.'.freshbooks.com/oauth/oauth_authorize.php'; }
-	public function requestTokenUrl() { return 'https://'.$this->oauth_consumer_key.'.freshbooks.com/oauth/oauth_request.php'; }
+	public function set_namespace($namespace)
+	{
+		$this->urlnamespace = $namespace;
+	}
+	
+	public function apiUrl() { return 'https://' . $this->urlnamespace . '.freshbooks.com/api/2.1/xml-in'; }
+	public function accessTokenUrl()  { return 'https://' . $this->urlnamespace . '.freshbooks.com/oauth/oauth_access.php'; }
+	public function authorizeUrl()    { return 'https://' . $this->urlnamespace . '.freshbooks.com/oauth/oauth_authorize.php'; }
+	public function requestTokenUrl() { return 'https://' . $this->urlnamespace . '.freshbooks.com/oauth/oauth_request.php'; }
 	
 
 	public function createNonce($length)

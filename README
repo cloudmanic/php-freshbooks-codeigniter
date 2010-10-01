@@ -14,3 +14,5 @@ To install:
 - Modify config.php with your relevant information.
 
 - Run the login method of the Freshbooks controller. 
+
+- To set a different sub domain from your consumer key use the $this->freshbooks_oauth->set_namespace('xxxxxxx'); See the constructor of freshbooks.php
