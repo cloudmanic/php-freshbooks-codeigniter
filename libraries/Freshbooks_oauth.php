@@ -221,15 +221,24 @@ class Freshbooks_oauth
 	//
 	// This function will return all the categories on the account.
 	//
-	function get_categories()
+	function get_categories($page = 1, $count = 100, $loop = TRUE)
 	{
 		if($this->oauth_token_secret && $this->oauth_token) { 
 			$data = array();
-			$request = '<?xml version="1.0" encoding="utf-8"?><request method="category.list"></request>';		
+			$request = $this->_build_xml('category.list', array('page' => $page, 'per_page' => $count));	
 
 			foreach($this->_get_data($request)->categories AS $key => $row)
 				foreach($row AS $key2 => $row2)
 					$data[] = $row2;
+
+			// Loop through the next pages
+			if($loop) {
+				$pages = (int) $this->_get_data($request)->categories->attributes()->pages;
+				if(($pages > 1) && ($pages >= $page)) {
+					$nextpage = $page + 1;
+					$data = array_merge($data, $this->get_categories($nextpage, $count));		
+				}
+			}
 					
 			return $data;
 		}
@@ -239,15 +248,24 @@ class Freshbooks_oauth
 	//
 	// This function will return all the expenses on the account.
 	//
-	function get_expenses()
+	function get_expenses($page = 1, $count = 100, $loop = TRUE)
 	{
 		if($this->oauth_token_secret && $this->oauth_token) { 
 			$data = array();
-			$request = '<?xml version="1.0" encoding="utf-8"?><request method="expense.list"></request>';		
+			$request = $this->_build_xml('expense.list', array('page' => $page, 'per_page' => $count));
 
 			foreach($this->_get_data($request)->expenses AS $key => $row)
 				foreach($row AS $key2 => $row2)
 					$data[] = $row2;
+					
+			// Loop through the next pages
+			if($loop) {
+				$pages = (int) $this->_get_data($request)->expenses->attributes()->pages;
+				if(($pages > 1) && ($pages >= $page)) {
+					$nextpage = $page + 1;
+					$data = array_merge($data, $this->get_expenses($nextpage, $count));		
+				}
+			}
 					
 			return $data;
 		}
@@ -257,15 +275,24 @@ class Freshbooks_oauth
 	//
 	// This function will return all the payments on the account.
 	//
-	function get_payments()
+	function get_payments($page = 1, $count = 100, $loop = TRUE)
 	{
 		if($this->oauth_token_secret && $this->oauth_token) { 
 			$data = array();
-			$request = '<?xml version="1.0" encoding="utf-8"?><request method="payment.list"></request>';		
+			$request = $this->_build_xml('payment.list', array('page' => $page, 'per_page' => $count));	
 			
 			foreach($this->_get_data($request)->payments AS $key => $row)
 				foreach($row AS $key2 => $row2)
 					$data[] = $row2;
+			
+			// Loop through the next pages
+			if($loop) {
+				$pages = (int) $this->_get_data($request)->payments->attributes()->pages;
+				if(($pages > 1) && ($pages >= $page)) {
+					$nextpage = $page + 1;
+					$data = array_merge($data, $this->get_payments($nextpage, $count));		
+				}
+			}
 					
 			return $data;
 		}
@@ -275,19 +302,42 @@ class Freshbooks_oauth
 	//
 	// This function will return all the customers in the account.
 	//
-	function get_customers()
+	function get_customers($page = 1, $count = 100, $loop = TRUE)
 	{
 		if($this->oauth_token_secret && $this->oauth_token) { 
 			$data = array();
-			$request = '<?xml version="1.0" encoding="utf-8"?><request method="client.list"></request>';		
+			$request = $this->_build_xml('client.list', array('page' => $page, 'per_page' => $count));		
 			
 			foreach($this->_get_data($request)->clients AS $key => $row)
 				foreach($row AS $key2 => $row2)
 					$data[] = $row2;
 
+			// Loop through the next pages
+			if($loop) {
+				$pages = (int) $this->_get_data($request)->clients->attributes()->pages;
+				if(($pages > 1) && ($pages >= $page)) {
+					$nextpage = $page + 1;
+					$data = array_merge($data, $this->get_customers($nextpage, $count));		
+				}
+			}
+			
 			return $data;
 		}
 		return 0;
+	}
+	
+	//
+	// Build the XML request.
+	//
+	private function _build_xml($method, $data)
+	{
+		$request = '<?xml version="1.0" encoding="utf-8"?><request method="' . $method . '">';
+		
+		foreach($data AS $key => $row)
+			$request .= "<$key>$row</$key>";
+		
+		$request .= '</request>';
+		return $request;
 	}
 	
 	//

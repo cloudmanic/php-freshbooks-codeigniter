@@ -21,7 +21,9 @@ Get Data Calls:
 
 Currently we do not support all the different calls to FreshBooks but we do have a handful to work from. In Freshbooks_oauth.php if you scroll to the comment section "Helper functions to get different datasets" you will be able to add or modify function calls to meet your data needs.
 
-- $this->freshbooks_oauth->get_categories()
-- $this->freshbooks_oauth->get_expenses()
-- $this->freshbooks_oauth->get_payments()
-- $this->freshbooks_oauth->get_customers()
+- $this->freshbooks_oauth->get_categories($page = 1, $count = 100, $loop = TRUE)
+- $this->freshbooks_oauth->get_expenses($page = 1, $count = 100, $loop = TRUE)
+- $this->freshbooks_oauth->get_payments($page = 1, $count = 100, $loop = TRUE)
+- $this->freshbooks_oauth->get_customers($page = 1, $count = 100, $loop = TRUE)
+
+* All the get_xxxxx() calls do not need to have any parameters passed into them if you want to get everything in the FreshBooks system. FreshBooks has a limit of 100 results at a time. The get_xxxxxx() are set to make multiple requests to get all the data. If you pass in a $page, $count, and set $loop to FALSE it will not loop and return the page you are after with the result count you are after. Not looping is a much better design for a system that is going to make API calls everyday.
