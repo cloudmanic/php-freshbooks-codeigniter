@@ -24,22 +24,15 @@
 **/
 
 
-/**
- *	This code base was changed to fit within Codeignitor.
- *
- * 	@author Spicer Matthews (spicer@cloudmanic.com)
- *
-**/
-
 class Freshbooks_oauth
 {
-	
 	protected $oauth_consumer_key;
 	protected $oauth_consumer_secret;
 	protected $oauth_callback;
 	protected $oauth_token;
 	protected $oauth_token_secret;
 	protected $urlnamespace;
+	public $fberror = NULL;
 	
 	
 	function __construct()
@@ -59,6 +52,7 @@ class Freshbooks_oauth
 		$this->oauth_consumer_key = $this->ci->config->item('consumer_key');
 		$this->oauth_consumer_secret = $this->ci->config->item('consumer_secret');
 		$this->oauth_callback = $this->ci->config->item('oauth_callback');
+		$this->urlnamespace = $this->oauth_consumer_key;
 	}
 	
 	
@@ -192,6 +186,7 @@ class Freshbooks_oauth
 	
 	public function post($request)
 	{
+		$this->fberror = NULL;
 		$headers = array(
 		            'Authorization: '.$this->buildAuthHeader().'',
 		            'Content-Type: application/xml; charset=UTF-8',
@@ -211,10 +206,13 @@ class Freshbooks_oauth
 		curl_close($ch);
 		$response = new SimpleXMLElement($response);
 		
-		if($response->attributes()->status == 'ok')								return $response;
-		elseif($response->attributes()->status == 'fail' || $response->error)	throw new FreshbooksAPIError($response->error);
-		else																	throw new FreshbooksError('Oops, something went wrong. :(');
+		if($response->attributes()->status == 'ok')	
+			return $response;
+		else if($response->attributes()->status == 'fail' || $response->fberror)	
+			throw new FreshbooksAPIError($response->error);
+		else throw new FreshbooksError('Oops, something went wrong. :(');
 	}
+	
 
 	// ------------- Helper functions to get different datasets -------------------- //
 
@@ -226,17 +224,20 @@ class Freshbooks_oauth
 		if($this->oauth_token_secret && $this->oauth_token) { 
 			$data = array();
 			$request = $this->_build_xml('category.list', array('page' => $page, 'per_page' => $count));	
+			$c = $this->_get_data($request);
 
-			foreach($this->_get_data($request)->categories AS $key => $row)
-				foreach($row AS $key2 => $row2)
-					$data[] = $row2;
-
-			// Loop through the next pages
-			if($loop) {
-				$pages = (int) $this->_get_data($request)->categories->attributes()->pages;
-				if(($pages > 1) && ($pages >= $page)) {
-					$nextpage = $page + 1;
-					$data = array_merge($data, $this->get_categories($nextpage, $count));		
+			if(is_null($this->fberror)) {
+				foreach($c->categories AS $key => $row)
+					foreach($row AS $key2 => $row2)
+						$data[] = $row2;
+	
+				// Loop through the next pages
+				if($loop) {
+					$pages = (int) $this->_get_data($request)->categories->attributes()->pages;
+					if(($pages > 1) && ($pages >= $page)) {
+						$nextpage = $page + 1;
+						$data = array_merge($data, $this->get_categories($nextpage, $count));		
+					}
 				}
 			}
 					
@@ -253,17 +254,20 @@ class Freshbooks_oauth
 		if($this->oauth_token_secret && $this->oauth_token) { 
 			$data = array();
 			$request = $this->_build_xml('expense.list', array('page' => $page, 'per_page' => $count));
+			$c = $this->_get_data($request);
 
-			foreach($this->_get_data($request)->expenses AS $key => $row)
-				foreach($row AS $key2 => $row2)
-					$data[] = $row2;
-					
-			// Loop through the next pages
-			if($loop) {
-				$pages = (int) $this->_get_data($request)->expenses->attributes()->pages;
-				if(($pages > 1) && ($pages >= $page)) {
-					$nextpage = $page + 1;
-					$data = array_merge($data, $this->get_expenses($nextpage, $count));		
+			if(is_null($this->fberror)) {
+				foreach($c->expenses AS $key => $row)
+					foreach($row AS $key2 => $row2)
+						$data[] = $row2;
+						
+				// Loop through the next pages
+				if($loop) {
+					$pages = (int) $this->_get_data($request)->expenses->attributes()->pages;
+					if(($pages > 1) && ($pages >= $page)) {
+						$nextpage = $page + 1;
+						$data = array_merge($data, $this->get_expenses($nextpage, $count));		
+					}
 				}
 			}
 					
@@ -280,17 +284,20 @@ class Freshbooks_oauth
 		if($this->oauth_token_secret && $this->oauth_token) { 
 			$data = array();
 			$request = $this->_build_xml('payment.list', array('page' => $page, 'per_page' => $count));	
+			$c = $this->_get_data($request);
 			
-			foreach($this->_get_data($request)->payments AS $key => $row)
-				foreach($row AS $key2 => $row2)
-					$data[] = $row2;
-			
-			// Loop through the next pages
-			if($loop) {
-				$pages = (int) $this->_get_data($request)->payments->attributes()->pages;
-				if(($pages > 1) && ($pages >= $page)) {
-					$nextpage = $page + 1;
-					$data = array_merge($data, $this->get_payments($nextpage, $count));		
+			if(is_null($this->fberror)) {
+				foreach($c->payments AS $key => $row)
+					foreach($row AS $key2 => $row2)
+						$data[] = $row2;
+				
+				// Loop through the next pages
+				if($loop) {
+					$pages = (int) $this->_get_data($request)->payments->attributes()->pages;
+					if(($pages > 1) && ($pages >= $page)) {
+						$nextpage = $page + 1;
+						$data = array_merge($data, $this->get_payments($nextpage, $count));		
+					}
 				}
 			}
 					
@@ -307,23 +314,24 @@ class Freshbooks_oauth
 		if($this->oauth_token_secret && $this->oauth_token) { 
 			$data = array();
 			$request = $this->_build_xml('client.list', array('page' => $page, 'per_page' => $count));		
+			$c = $this->_get_data($request);
 			
-			foreach($this->_get_data($request)->clients AS $key => $row)
-				foreach($row AS $key2 => $row2)
-					$data[] = $row2;
-
-			// Loop through the next pages
-			if($loop) {
-				$pages = (int) $this->_get_data($request)->clients->attributes()->pages;
-				if(($pages > 1) && ($pages >= $page)) {
-					$nextpage = $page + 1;
-					$data = array_merge($data, $this->get_customers($nextpage, $count));		
+			if(is_null($this->fberror)) {
+				foreach($c->clients AS $key => $row)
+					foreach($row AS $key2 => $row2)
+						$data[] = $row2;
+		
+				// Loop through the next pages
+				if($loop) {
+					$pages = (int) $this->_get_data($request)->clients->attributes()->pages;
+					if(($pages > 1) && ($pages >= $page)) {
+						$nextpage = $page + 1;
+						$data = array_merge($data, $this->get_customers($nextpage, $count));		
+					}
 				}
 			}
-			
 			return $data;
 		}
-		return 0;
 	}
 	
 	//
@@ -345,17 +353,19 @@ class Freshbooks_oauth
 	//
 	private function _get_data($request)
 	{
+		$this->fberror = NULL;
 		try {
 		  $clients = $this->post($request);
 		  return $clients;
 		}
 		catch(FreshbooksError $e)
 		{
-		  $this->error = $e->getMessage();
+		  $this->fberror = $e->getMessage();
 		  return 0;
 		}	
 	}
 }
+
 
 class FreshbooksError extends Exception {}
 class FreshbooksAPIError extends FreshbooksError {}
